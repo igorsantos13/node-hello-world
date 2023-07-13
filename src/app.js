@@ -1,14 +1,26 @@
-const http = require('http')
+const express = require('express');
+const app = express();
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
+const PORT = 3000;
 
-const port = 3000
-const hostname = '127.0.0.1'
-
-const server = http.createServer((request, response) => {
-    response.statusCode = 200
-    response.setHeader('Content-Type', 'text/plain')
-    response.end('Hello World\n')
+//sends to home page a message
+app.get('/', (req, res)=>{
+    res.send('Hello express!')
 })
 
-server.listen(port, hostname, ()=> {
-    console.log(`Server running at http://${hostname}:${port}/`)
+//post and print the data back
+app.post('/api/driverData', (req, res) => {
+    console.log(req.body)
+    res.send(req.body)
+})
+
+//make a post request to homepage, as response we have a message
+app.post('/', (req, res) => {
+    res.send('This is a post request!')
+})
+
+//listen to a port
+app.listen(PORT, () => {
+    console.log('App listening on port ' + PORT)
 })
