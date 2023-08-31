@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose')
+const Customer = require('./models/customer')
 const app = express();
 
 mongoose.set('strictQuery', false);
@@ -14,20 +15,31 @@ if(process.env.NODE_ENV !== 'production'){
 const PORT = process.env.PORT || 3000;
 const CONNECTION = process.env.CONNECTION;
 
+const customer = new Customer({
+    name: 'Cleito',
+    industry: 'Music'
+});
+
 //sends to home page a message
 app.get('/', (req, res)=>{
-    res.send('Hello express!')
+    res.send(customer)
 })
 
 //post and print the data back
-app.post('/api/driverData', (req, res) => {
-    console.log(req.body)
-    res.send(req.body)
+app.get('/api/customers', async (req, res) => {
+    try{
+        const result = await Customer.find(); //grabs all the data
+        res.json({"customers": result})
+        res.status(200)
+    }catch(err){
+        res.status(500).json({error: err.message})
+    }
 })
 
 //make a post request to homepage, as response we have a message
-app.post('/', (req, res) => {
-    res.send('This is a post request!')
+app.post('/api/customers', (req, res) => {
+    console.log(req.body)
+    res.send(req.body)
 })
 
 const start = async() => {
