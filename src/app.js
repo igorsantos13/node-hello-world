@@ -36,6 +36,43 @@ app.get('/api/customers', async (req, res) => {
     }
 })
 
+
+app.get('/api/customers/:id', async (req, res) => {
+    try{
+        const {id: customerID} = req.params; //get users ID;
+        const customer = await Customer.findById(customerID);
+
+        if(!customer){
+            res.status(404).json({error: 'User not found'})
+        }else{
+            res.json({customer})
+        }
+
+    }catch(err){
+        res.status(500).json({error: 'it is broken :('})
+    }
+})
+
+app.put('/api/customers/:id', async (req, res) => {
+    try{
+        const customerID = req.params.id
+        const result = await Customer.replaceOne({_id: customerID}, req.body)
+        res.json({updateCount: result.modifiedCount})
+    }catch(err){
+        res.status(500).json({error: 'something went wrong =('})
+    }
+})
+
+app.delete('/api/customers/:id', async(req,res) => {
+    try{
+        const customerID = req.params.id
+        const result = await Customer.deleteOne({_id: customerID})
+        res.json({deletedCount: result.deletedCount})
+    }catch(err){
+        res.status(500).json({error: "something went wrong..."})
+    }
+})
+
 //make a post request to homepage, as response we have a message
 app.post('/api/customers', (req, res) => {
     console.log(req.body)
