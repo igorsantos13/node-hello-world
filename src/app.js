@@ -1,9 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose')
+const cors = require('cors')
 const Customer = require('./models/customer')
 const app = express();
 
 mongoose.set('strictQuery', false);
+
+app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
@@ -73,10 +76,16 @@ app.delete('/api/customers/:id', async(req,res) => {
     }
 })
 
-//make a post request to homepage, as response we have a message
-app.post('/api/customers', (req, res) => {
+//add a new customer to DB
+app.post('/api/customers', async(req, res) => {
+    const customer = new Customer(req.body);
     console.log(req.body)
-    res.send(req.body)
+    try{
+        await customer.save();
+        res.status(201).json({customer})
+    }catch(err){
+        res.status(400).json({error: err.message})
+    }
 })
 
 const start = async() => {
