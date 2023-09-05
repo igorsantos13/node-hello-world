@@ -56,13 +56,65 @@ app.get('/api/customers/:id', async (req, res) => {
     }
 })
 
+//good to replace the entire resource - copies entire data and sends back everythihng
 app.put('/api/customers/:id', async (req, res) => {
     try{
         const customerID = req.params.id
-        const result = await Customer.replaceOne({_id: customerID}, req.body)
-        res.json({updateCount: result.modifiedCount})
+        const customer = await Customer.findOneAndReplace({_id: customerID}, req.body, {new: true})
+        res.json({customer})
     }catch(err){
         res.status(500).json({error: 'something went wrong =('})
+    }
+})
+
+//good to change few lines and resends back to API only what was changed
+app.patch('/api/customers/:id', async (req, res) => {
+    try{
+        const customerID = req.params.id;
+        const customer = await Customer.findOneAndUpdate({_id: customerID}, req.body, {new: true});
+        console.log(customer)
+        res.json({customer})
+    }catch(err){
+        res.json({error: err.messsage})
+    }
+})
+
+//update nested data
+app.patch('/api/orders/:id', async (req, res) => {
+    const orderID = req.params.id;
+    req.body._id = orderID;
+    try {
+        const result = await Customer.findOneAndUpdate(
+            { 'orders._id': orderID },
+            { $set: { 'orders.$': req.body } },
+            { new: true }
+        );
+            console.log(result)
+            console.log(req.body)
+        if (result) {
+            res.json(result);
+        } else {
+            res.status(404).json({ error: 'Order not found' });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+})
+
+app.get('/api/orders/:id', async (req, res) => {
+    try{
+        const {id: orderID} = req.params; //get users ID;
+        const order = await Customer.findOne({'orders._id': orderID});
+
+        if(!order){
+            res.status(404).json({error: 'User not found'})
+        }else{
+            res.json(order)
+        }
+
+    }catch(err){
+        res.status(500).json({error: 'it is broken :('})
     }
 })
 
